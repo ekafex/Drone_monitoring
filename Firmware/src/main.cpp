@@ -5,93 +5,14 @@
 #define I2C_SDA 8
 #define I2C_SCL 9
 
-// The used commands use up to 48 bytes. On some Arduino's the default buffer
-// space is not large enough
-#define MAXBUF_REQUIREMENT 48
-
-#if (defined(I2C_BUFFER_LENGTH) &&                 \
-     (I2C_BUFFER_LENGTH >= MAXBUF_REQUIREMENT)) || \
-    (defined(BUFFER_LENGTH) && BUFFER_LENGTH >= MAXBUF_REQUIREMENT)
-#define USE_PRODUCT_INFO
-#endif
 
 SensirionI2CSen5x sen5x;
 
-void printModuleVersions() {
-    uint16_t error;
-    char errorMessage[256];
-
-    unsigned char productName[32];
-    uint8_t productNameSize = 32;
-
-    error = sen5x.getProductName(productName, productNameSize);
-
-    if (error) {
-        Serial.print("Error trying to execute getProductName(): ");
-        errorToString(error, errorMessage, 256);
-        Serial.println(errorMessage);
-    } else {
-        Serial.print("ProductName:");
-        Serial.println((char*)productName);
-    }
-
-    uint8_t firmwareMajor;
-    uint8_t firmwareMinor;
-    bool firmwareDebug;
-    uint8_t hardwareMajor;
-    uint8_t hardwareMinor;
-    uint8_t protocolMajor;
-    uint8_t protocolMinor;
-
-    error = sen5x.getVersion(firmwareMajor, firmwareMinor, firmwareDebug,
-                             hardwareMajor, hardwareMinor, protocolMajor,
-                             protocolMinor);
-    if (error) {
-        Serial.print("Error trying to execute getVersion(): ");
-        errorToString(error, errorMessage, 256);
-        Serial.println(errorMessage);
-    } else {
-        Serial.print("Firmware: ");
-        Serial.print(firmwareMajor);
-        Serial.print(".");
-        Serial.print(firmwareMinor);
-        Serial.print(", ");
-
-        Serial.print("Hardware: ");
-        Serial.print(hardwareMajor);
-        Serial.print(".");
-        Serial.println(hardwareMinor);
-    }
-}
-
-void printSerialNumber() {
-    uint16_t error;
-    char errorMessage[256];
-    unsigned char serialNumber[32];
-    uint8_t serialNumberSize = 32;
-
-    error = sen5x.getSerialNumber(serialNumber, serialNumberSize);
-    if (error) {
-        Serial.print("Error trying to execute getSerialNumber(): ");
-        errorToString(error, errorMessage, 256);
-        Serial.println(errorMessage);
-    } else {
-        Serial.print("SerialNumber:");
-        Serial.println((char*)serialNumber);
-    }
-}
-
 void setup() {
-
     Serial.begin(115200);
-    while (!Serial) {
-        delay(100);
-    }
-
+    while (!Serial) { delay(100); }
     Wire.begin(I2C_SDA, I2C_SCL);
-
     sen5x.begin(Wire);
-
     uint16_t error;
     char errorMessage[256];
     error = sen5x.deviceReset();
@@ -101,11 +22,7 @@ void setup() {
         Serial.println(errorMessage);
     }
 
-// Print SEN55 module information if i2c buffers are large enough
-#ifdef USE_PRODUCT_INFO
-    printSerialNumber();
-    printModuleVersions();
-#endif
+
 
     // set a temperature offset in degrees celsius
     // Note: supported by SEN54 and SEN55 sensors
@@ -146,6 +63,7 @@ void setup() {
     }
 }
 
+
 void loop() {
     uint16_t error;
     char errorMessage[256];
@@ -173,43 +91,43 @@ void loop() {
         Serial.println(errorMessage);
     } else {
         Serial.print("PM1=");
-        Serial.print(massConcentrationPm1p0);
+        Serial.print(massConcentrationPm1p0,2);
         //Serial.print("\t");
         Serial.print("; PM2.5=");
-        Serial.print(massConcentrationPm2p5);
+        Serial.print(massConcentrationPm2p5,2);
         //Serial.print("\t");
         Serial.print("; PM4=");
-        Serial.print(massConcentrationPm4p0);
+        Serial.print(massConcentrationPm4p0,2);
         //Serial.print("\t");
         Serial.print("; PM10=");
-        Serial.print(massConcentrationPm10p0);
+        Serial.print(massConcentrationPm10p0,2);
         //Serial.print("\t");
         Serial.print("; H=");
         if (isnan(ambientHumidity)) {
             Serial.print("n/a");
         } else {
-            Serial.print(ambientHumidity);
+            Serial.print(ambientHumidity,2);
         }
         //Serial.print("\t");
         Serial.print("%; T=");
         if (isnan(ambientTemperature)) {
             Serial.print("n/a");
         } else {
-            Serial.print(ambientTemperature);
+            Serial.print(ambientTemperature,2);
         }
         //Serial.print("\t");
         Serial.print("°C; VOC=");
         if (isnan(vocIndex)) {
             Serial.print("n/a");
         } else {
-            Serial.print(vocIndex);
+            Serial.print(vocIndex,0);
         }
         //Serial.print("\t");
         Serial.print("; NOx=");
         if (isnan(noxIndex)) {
             Serial.println("n/a");
         } else {
-            Serial.println(noxIndex);
+            Serial.println(noxIndex,0);
         }
     }
 }
