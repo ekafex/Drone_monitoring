@@ -86,3 +86,6 @@ modules I2C interface.
 
 
 
+
+
+<center><img src="images/microSD.svg" width="400px"></center>
